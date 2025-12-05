@@ -35,14 +35,26 @@ int32_t get_upper_imm(uint32_t inst) {
     return uimm << 12;
 }
 
+// Get branch immediate
 int32_t get_branch_imm(uint32_t inst) {
     int32_t imm = 0;
     imm |= ((inst >> 7) & 0x1) << 11;     // imm[11]
     imm |= ((inst >> 8) & 0xF) << 1;      // imm[4:1]
     imm |= ((inst >> 25) & 0x3F) << 5;    // imm[10:5]
     imm |= ((inst >> 31) & 0x1) << 12;    // imm[12]
-    // sign-extend 13-bit immediate
+    // Sign-extend 13-bit immediate
     return (imm << 19) >> 19;
+}
+
+// Get jump immediate 
+int32_t get_jump_imm(uint32_t inst) {
+    int32_t imm = 0;
+    imm |= ((inst >> 21) & 0x3FF) << 1; // imm[10:1] = inst[30:21]
+    imm |= ((inst >> 20) & 0x1) << 11;  // imm[11] = inst[20]
+    imm |= ((inst >> 12) & 0xFF) << 12; // imm[19:12] = inst[19:12]
+    imm |= ((inst >> 31) & 0x1) << 20;  // imm[20] = inst[31]
+    // Sign-extend 21 bit to 32 bit
+    return (imm << 11) >> 11;
 }
 
 // Uses bitmask to return 3 bits from bits 12-14 - the funct3
@@ -65,6 +77,7 @@ void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_s
     int32_t imm = get_imm(instruction);
     int32_t uimm = get_upper_imm(instruction);
     int32_t bimm = get_branch_imm(instruction);
+    int32_t jimm = get_jump_imm(instruction);
     uint32_t shamt = get_rs2(instruction); // same bit placement as rs2
 
     switch (op_code) {
@@ -128,84 +141,109 @@ void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_s
     /* R-type ALU (register to register, including M extension) */
         case 0x33: {
             switch (funct7) {
-                case 0x00: // Standard ALU
+                case 0x00: { // Standard ALU
                     switch (funct3) {
-                        case 0x0:
+                        case 0x0: {
                             snprintf(result, buf_size, "add x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x1:
+                        }
+                        case 0x1: {
                             snprintf(result, buf_size, "sll x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x2:
+                        }
+                        case 0x2: {
                             snprintf(result, buf_size, "slt x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x3:
+                        }
+                        case 0x3: {
                             snprintf(result, buf_size, "sltu x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x4:
+                        }
+                        case 0x4: {
                             snprintf(result, buf_size, "xor x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x5:
+                        }
+                        case 0x5: {
                             snprintf(result, buf_size, "srl x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x6:
+                        }
+                        case 0x6: {
                             snprintf(result, buf_size, "or x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x7:
+                        }
+                        case 0x7: {
                             snprintf(result, buf_size, "and x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        default:
+                        }
+                        default: {
                             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
                             break;
                         }
+                    }
                     break;
-                case 0x20: // sub / sra
+                }
+                case 0x20: { // sub / sra
                     switch (funct3) {
-                        case 0x0:
+                        case 0x0: {
                             snprintf(result, buf_size, "sub x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x5:
+                        }
+                        case 0x5: {
                             snprintf(result, buf_size, "sra x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        default:
+                        }
+                        default: {
                             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
                             break;
                         }
+                    }
                     break;
-                case 0x01: // M-extension
+                }
+                case 0x01: { // M-extension
                     switch (funct3) {
-                        case 0x0:
+                        case 0x0: {
                             snprintf(result, buf_size, "mul x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x1:
+                        }
+                        case 0x1: {
                             snprintf(result, buf_size, "mulh x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x2:
+                        }
+                        case 0x2: {
                             snprintf(result, buf_size, "mulhsu x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x3:
+                        }
+                        case 0x3: {
                             snprintf(result, buf_size, "mulhu x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x4:
+                        }
+                        case 0x4: {
                             snprintf(result, buf_size, "div x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x5:
+                        }
+                        case 0x5: {
                             snprintf(result, buf_size, "divu x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x6:
+                        }
+                        case 0x6: {
                             snprintf(result, buf_size, "rem x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        case 0x7:
+                        }
+                        case 0x7: {
                             snprintf(result, buf_size, "remu x%d, x%d, x%d", rd, rs1, rs2);
                             break;
-                        default:
+                        }
+                        default: {
                             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
                             break;
                         }
+                    }
                     break;
-                default:
+                }
+                default: {
                     snprintf(result, buf_size, "unknown (0x%08x)", instruction);
                     break;
+                    }
             }
             break;
         }
@@ -236,10 +274,43 @@ void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_s
                     snprintf(result, buf_size, "bgeu x%d, x%d, %d", rs1, rs2, bimm);
                     break;
                 }
-                default:
+                default: {
                     snprintf(result, buf_size, "unknown (0x%08x)", instruction);
                     break;
+                }
             }
+            break;
+        }
+    /* Jumps */
+        case 0x6F: {
+            snprintf(result, buf_size, "jal x%d, %d", rd, jimm);
+            break;
+        }
+        case 0x67: {
+            snprintf(result, buf_size, "jalr x%d, %d(x%d)", rd, imm, rs1);
+            break;
+        }
+    /* System calls */
+        case 0x73: {
+            if (funct3 == 0x0) {
+                switch (imm) {
+                    case 0x0: { // ecall
+                        snprintf(result, buf_size, "ecall");
+                        break;
+                    }
+                    default: {
+                        snprintf(result, buf_size, "unknown (0x%08x)", instruction);
+                        break;
+                    }
+                }
+            } else {
+                break;
+            }
+            break;
+        }
+    /* Default to unknown if everything fails */
+        default: {
+            snprintf(result, buf_size, "unknown (0x%08x)", instruction);
             break;
         }
     }
