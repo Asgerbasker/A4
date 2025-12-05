@@ -35,6 +35,16 @@ int32_t get_upper_imm(uint32_t inst) {
     return uimm << 12;
 }
 
+int32_t get_branch_imm(uint32_t inst) {
+    int32_t imm = 0;
+    imm |= ((inst >> 7) & 0x1) << 11;     // imm[11]
+    imm |= ((inst >> 8) & 0xF) << 1;      // imm[4:1]
+    imm |= ((inst >> 25) & 0x3F) << 5;    // imm[10:5]
+    imm |= ((inst >> 31) & 0x1) << 12;    // imm[12]
+    // sign-extend 13-bit immediate
+    return (imm << 19) >> 19;
+}
+
 // Uses bitmask to return 3 bits from bits 12-14 - the funct3 
 uint32_t get_funct3(uint32_t inst) {
     return inst >> 12 & 0x7;
@@ -54,10 +64,12 @@ void disassemble(uint32_t addr, uint32_t instruction, char* result, size_t buf_s
     uint32_t rs2 = get_rs2(instruction);
     int32_t imm = get_imm(instruction);
     int32_t uimm = get_upper_imm(instruction);
+    int32_t bimm = get_branch_imm(instruction);
     uint32_t shamt = get_rs2(instruction); // same bit placement as rs2
 
     switch (op_code) {
-    /* I-type ALU (immediate) */
+    /* -- RV32I -- */
+    /* I-type ALU (immediate) -- DONE */
         case 0x13: {
             if (funct3 == 0x0) { 
                 snprintf(result, buf_size, "addi x%d, x%d, %d", rd, rs1, imm);
@@ -91,7 +103,7 @@ void disassemble(uint32_t addr, uint32_t instruction, char* result, size_t buf_s
             snprintf(result, buf_size, "auipc x%d, %d", rd, uimm);
             break;
         }
-    /* R-type ALU (register to register) */
+    /* R-type ALU (register to register) -- DONE */
         case 0x33: { 
             if (funct3 == 0x0 && funct7 == 0x00) { 
                 snprintf(result, buf_size, "add x%d, x%d, x%d", rd, rs1, rs2);
@@ -126,9 +138,42 @@ void disassemble(uint32_t addr, uint32_t instruction, char* result, size_t buf_s
             }
             break;
         }
-        default:
+    /* Branch */
+        case 0x63: {
+            switch (funct3) {
+                case 0x0: {
+                    snprintf(result, buf_size, "beq x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                case 0x1: {
+                    snprintf(result, buf_size, "bne x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                case 0x4: {
+                    snprintf(result, buf_size, "blt x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                case 0x5: {
+                    snprintf(result, buf_size, "bge x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                case 0x6: {
+                    snprintf(result, buf_size, "bltu x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                case 0x7: {
+                    snprintf(result, buf_size, "bgeu x%d, x%d, %d", rs1, rs2, bimm);
+                    break;
+                }
+                default:
+                    snprintf(result, buf_size, "unknown (0x%08x)", instruction);
+                    break;
+            }
+            break;
+        }
+        default: {
             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
             break;
-        
+        }
     }
 }
