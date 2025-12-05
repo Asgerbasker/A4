@@ -28,6 +28,12 @@ int32_t get_imm(uint32_t inst) {
     int32_t imm = inst >> 20; // take bits 20-31
     return (imm << 20) >> 20; // sign extend from 12 bit to 32 bit
 }   
+int32_t get_imm_s(uint32_t inst){
+    int32_t imm11_5 = (inst >> 25) & 0x7F;
+    int32_t imm4_0  = (inst >> 7)  & 0x1F;
+    int32_t imm = (imm11_5 << 5) | imm4_0;
+    return (imm << 20) >> 20;   // sign-extend 12 bits
+}
 
 // Uses bitmask to return 20 bits from bit 12-31 of the instruction - the upper immediate 
 int32_t get_upper_imm(uint32_t inst) {
@@ -54,6 +60,7 @@ void disassemble(uint32_t addr, uint32_t instruction, char* result, size_t buf_s
     uint32_t rs2 = get_rs2(instruction);
     int32_t imm = get_imm(instruction);
     int32_t uimm = get_upper_imm(instruction);
+    int32_t simm = get_imm_s(instruction);
     uint32_t shamt = get_rs2(instruction); // same bit placement as rs2
 
     switch (op_code) {
@@ -120,15 +127,33 @@ void disassemble(uint32_t addr, uint32_t instruction, char* result, size_t buf_s
         }
         case 0x03: {
             if (funct3 == 0x0) {
-                snprintf(result, buf_size,"lb x%d, x%d ,%d", rd, rs1, imm);
-            } else {
-                snprintf(result, buf_size, "unknown (0x%08x)", instruction);
+                snprintf(result, buf_size,"lb x%d, %d(x%d)", rd, imm, rs1);
+            } else if(funct3==0x1){
+                snprintf(result,buf_size,"lh x%d, %d(x%d)", rd, imm, rs1);
+            } else if(funct3==0x2){
+                snprintf(result,buf_size,"lw x%d, %d(x%d)", rd, imm, rs1);
+            } else if(funct3==0x4){
+                snprintf(result,buf_size,"lbu x%d, %d(x%d)", rd, imm, rs1);
+            } else if(funct3==0x5){
+                snprintf(result,buf_size,"lhu x%d, %d(x%d)", rd, imm, rs1);
             }
+            // } else{
+            //     snprintf(result, buf_size, "unknown (0x%08x)", instruction);
+            // }
             break;
+        }   
+        case 0x23:{
+            if(funct3==0x0){
+                snprintf(result,buf_size, "sb x%d ,%d(x%d)",rs2,simm,rs1);
+            } else if (funct3==0x1){
+                snprintf(result,buf_size, "sh x%d ,%d(x%d)",rs2,simm,rs1);
+            }   else if (funct3==0x2){
+                snprintf(result,buf_size, "sw x%d ,%d(x%d)",rs2,simm,rs1);
+            }
+            
         }
         default:
             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
             break;
-        
-    }
+        }
 }
