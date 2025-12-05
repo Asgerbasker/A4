@@ -60,11 +60,16 @@ uint32_t get_funct3(uint32_t inst) {
 uint32_t get_funct7(uint32_t inst) {
     return inst >> 25 & 0x7F;
 }
+uint32_t get_funct12(uint32_t inst) {
+    int32_t imm = inst >> 20; // take bits 20-31
+    return (imm << 20) >> 20; // sign extend from 12 bit to 32 bit
+}
 
 void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_size, struct symbols *symbols) {
     uint32_t op_code = get_opcode(instruction);
     uint32_t funct3 = get_funct3(instruction);
     uint32_t funct7 = get_funct7(instruction);
+    uint32_t funct12 = get_funct12(instruction);
     uint32_t rd = get_rd(instruction);
     uint32_t rs1 = get_rs1(instruction);
     uint32_t rs2 = get_rs2(instruction);
@@ -227,6 +232,8 @@ void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_s
                 snprintf(result,buf_size,"lbu x%d, %d(x%d)", rd, imm, rs1);
             } else if(funct3==0x5){
                 snprintf(result,buf_size,"lhu x%d, %d(x%d)", rd, imm, rs1);
+            }
+        }
     /* Branch */
         case 0x63: {
             switch (funct3) {
@@ -271,10 +278,34 @@ void disassemble(uint32_t addr, uint32_t instruction, char *result, size_t buf_s
             }   else if (funct3==0x2){
                 snprintf(result,buf_size, "sw x%d ,%d(x%d)",rs2,simm,rs1);
             }
-            
+                break;
         }
-        default:
+        case 0x73:{
+            switch (funct12){
+            {
+            case 0x102:{
+                snprintf(result,buf_size,"sret");
+                break;
+            }
+            case 0x302:{
+                snprintf(result,buf_size,"mret");
+                break;
+            }
+            case 105:{
+                snprintf(result,buf_size,"wfi");
+                break;
+            }
+        }
+            switch (funct7)
+            {
+            case 0X11:
+                snprintf(result,buf_size,"sfence.vma x%d , x%d", rs1,rs2);
+                break;
+            }
+        }
+        }
+        default:{
             snprintf(result, buf_size, "unknown (0x%08x)", instruction);
             break;
         }
-}
+    }
