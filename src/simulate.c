@@ -2,8 +2,14 @@
 #include "disassemble.h"
 #include "helpers.h"
 
-struct Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct symbols* symbols) {
+Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct symbols* symbols) {
     struct Stat stat = {0};
+    const unsigned sizes[4] = {256, 1024, 4096, 16384};
+
+    for (int i = 0; i < 4; i++) {
+        bimodal_init(&stat.bimodal[i], sizes[i]);
+        gshare_init(&stat.gshare[i], sizes[i]);
+    }
 
     // 32 registers
     int32_t regs[32];
@@ -76,7 +82,7 @@ struct Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct 
             case 0x6F: { // jal
                 write_reg(rd, pc + 4, regs);
                 next_pc = pc + jimm;
-                mark_target = 1;   // next instruction is jump-target
+                mark_target = 1; 
                 reg_written = rd;
                 reg_value = pc + 4;
                 break;
@@ -101,7 +107,7 @@ struct Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct 
                         take_branch = (v_rs1 == v_rs2);
                         break;
                     }
-                    case 0x1: {
+                    case 0x1: { // bne
                         take_branch = (v_rs1 != v_rs2);
                         break;
                     }
@@ -127,12 +133,21 @@ struct Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct 
                 }
                 if (take_branch) {
                     next_pc = pc + bimm;
-                    // next instruction is jump-target
                     mark_target = 1;
                 }
                 // log info about jump
                 branch_logged = 1;
                 branch_taken = take_branch;
+
+                // update jump predictors
+                // NT + BTFNT
+                pred_nt(&stat.nt, take_branch);
+                pred_btfnt(&stat.btfnt, take_branch, bimm);
+                // Bimodal + gShare
+                for (int i = 0; i < 4; i++) {
+                    bimodal_update(&stat.bimodal[i], pc, take_branch);
+                    gshare_update(&stat.gshare[i], pc, take_branch);
+                }
                 break;
             }
             /* I-type ALU  */
@@ -422,16 +437,14 @@ struct Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct 
             }
         }
         if (log_file) {
-            // Betinget hop: {T} / {F}
+            // conditional jump: {T} / {F}
             if (branch_logged) {
                 fprintf(log_file, "    {%c}", branch_taken ? 'T' : 'F');
             }
-
-            // Registerskrivning: R[..] <- ..
+            // Register writes: R[..] <- ..
             if (reg_written > 0 && reg_written < 32) { // x0 ignoreres
                 fprintf(log_file, "    R[%2d] <- %x", reg_written, reg_value);
             }
-
             // Memory write: M[..] <- ..
             if (mem_written) {
                 switch (mem_size) {

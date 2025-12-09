@@ -14,4 +14,4 @@ zip: ../src.zip
 	cd .. && zip -r src.zip src/Makefile src/*.c src/*.h
 
 clean:
-	rm -rf *.o sim  vgcore*
+	rm -rf *.o sim log vgcore*

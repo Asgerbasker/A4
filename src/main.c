@@ -7,8 +7,7 @@
 #include <string.h>
 #include <time.h>
 
-void terminate(const char *error)
-{
+void terminate(const char *error) {
   printf("%s\n", error);
   printf("RISC-V Simulator v0.11.0: Usage:\n");
   printf("  sim riscv-elf sim-options -- prog-args\n");
@@ -28,7 +27,9 @@ int pass_args_to_program(struct memory* mem, int argc, char* argv[]) {
   int seperator_found = 0;
   while (seperator_position < argc) {
     seperator_found = strcmp(argv[seperator_position],"--") == 0;
-    if (seperator_found) break;
+    if (seperator_found) {
+      break;
+    }
     seperator_position++;
   }
   if (seperator_found) { // we've got args for the program!!
@@ -54,8 +55,7 @@ int pass_args_to_program(struct memory* mem, int argc, char* argv[]) {
 }
 
 // Helper function, prints disassembly
-void disassemble_to_stdout(struct memory* mem, struct program_info* prog_info, struct symbols* symbols) 
-{
+void disassemble_to_stdout(struct memory* mem, struct program_info* prog_info, struct symbols* symbols) {
   const int buf_size = 100;
   char disassembly[buf_size];
   for (unsigned int addr = prog_info->text_start; addr < prog_info->text_end; addr += 4) {
@@ -65,33 +65,29 @@ void disassemble_to_stdout(struct memory* mem, struct program_info* prog_info, s
   }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   struct memory *mem = memory_create();
   argc = pass_args_to_program(mem, argc, argv);
-  if (argc == 2 || argc == 3 || argc == 4)
-  {
+  if (argc == 2 || argc == 3 || argc == 4) {
     FILE *log_file = NULL;
     FILE *prof_file = NULL;
-    if (argc == 4 && !strcmp(argv[2], "-l"))
-    {
+    if (argc == 4 && !strcmp(argv[2], "-l")) {
       log_file = fopen(argv[3], "w");
-      if (log_file == NULL)
-      {
+      if (log_file == NULL) {
         terminate("Could not open logfile, terminating.");
       }
     }
-    if (argc == 4 && !strcmp(argv[2], "-p"))
-    {
+    if (argc == 4 && !strcmp(argv[2], "-p")) {
       prof_file = fopen(argv[3], "w");
-      if (prof_file == NULL)
-      {
+      if (prof_file == NULL) {
         terminate("Could not open file for exec profile, terminating.");
       }
     }
     struct program_info prog_info;
     int status = read_elf(mem, &prog_info, argv[1], log_file);
-    if (status) exit(status);
+    if (status) {
+      exit(status);
+    }
     // The use of symbols provide for a nicer disassembly, but their us in A4 is optional,
     // so feel free to remove/ignore setup and use of symbols.
     struct symbols* symbols = symbols_read_from_elf(argv[1]);
@@ -105,29 +101,65 @@ int main(int argc, char *argv[])
     }
     int start_addr = prog_info.start;
     clock_t before = clock();
-    struct Stat stats = simulate(mem, start_addr, log_file, symbols);
+    Stat stats = simulate(mem, start_addr, log_file, symbols);
     long int num_insns = stats.insns;
     clock_t after = clock();
     int ticks = after - before;
     double mips = (1.0 * num_insns * CLOCKS_PER_SEC) / ticks / 1000000;
-    if (argc == 4 && !strcmp(argv[2], "-s"))
-    {
+    const int bp_sizes[4] = {256, 1024, 4096, 16384};
+    if (argc == 4 && !strcmp(argv[2], "-s")) {
       log_file = fopen(argv[3], "w");
-      if (log_file == NULL)
-      {
+      if (log_file == NULL) {
         terminate("Could not open logfile, terminating.");
       }
     }
-    if (log_file)
-    {
+    if (log_file) {
       fprintf(log_file, "\nSimulated %ld instructions in %d host ticks (%f MIPS)\n", num_insns, ticks, mips);
+      fprintf(log_file, "\nBranch prediction statistics:\n");
+      fprintf(log_file, "  NT:    %llu predictions, %llu mispredictions (%.2f%%)\n",
+              stats.nt.total, stats.nt.mispred,
+              stats.nt.total ? 100.0 * stats.nt.mispred / stats.nt.total : 0.0);
+      fprintf(log_file, "  BTFNT: %llu predictions, %llu mispredictions (%.2f%%)\n",
+              stats.btfnt.total, stats.btfnt.mispred,
+              stats.btfnt.total ? 100.0 * stats.btfnt.mispred / stats.btfnt.total : 0.0);
+      for (int i = 0; i < 4; i++) {
+      fprintf(log_file, "  Bimodal %5d: %llu predictions, %llu mispredictions (%.2f%%)\n",
+              bp_sizes[i],
+              stats.bimodal[i].pstat.total, stats.bimodal[i].pstat.mispred,
+              stats.bimodal[i].pstat.total ? 100.0 * stats.bimodal[i].pstat.mispred / stats.bimodal[i].pstat.total : 0.0);
+      fprintf(log_file, "  gShare  %5d: %llu predictions, %llu mispredictions (%.2f%%)\n",
+              bp_sizes[i],
+              stats.gshare[i].pstat.total, stats.gshare[i].pstat.mispred,
+              stats.gshare[i].pstat.total ? 100.0 * stats.gshare[i].pstat.mispred / stats.gshare[i].pstat.total : 0.0);
+      }
       fclose(log_file);
     }
-    else
-    {
+    else {
       printf("\nSimulated %ld instructions in %d host ticks (%f MIPS)\n", num_insns, ticks, mips);
+      printf("\nBranch prediction statistics:\n");
+      printf("  NT:    %llu predictions, %llu mispredictions (%.2f%%)\n",
+             stats.nt.total, stats.nt.mispred,
+             stats.nt.total ? 100.0 * stats.nt.mispred / stats.nt.total : 0.0);
+      printf("  BTFNT: %llu predictions, %llu mispredictions (%.2f%%)\n",
+             stats.btfnt.total, stats.btfnt.mispred,
+             stats.btfnt.total ? 100.0 * stats.btfnt.mispred / stats.btfnt.total : 0.0);
+      for (int i = 0; i < 4; i++) {
+        printf("  Bimodal %5d: %llu predictions, %llu mispredictions (%.2f%%)\n",
+               bp_sizes[i],
+               stats.bimodal[i].pstat.total, stats.bimodal[i].pstat.mispred,
+               stats.bimodal[i].pstat.total ? 100.0 * stats.bimodal[i].pstat.mispred / stats.bimodal[i].pstat.total : 0.0);
+        printf("  gShare  %5d: %llu predictions, %llu mispredictions (%.2f%%)\n",
+               bp_sizes[i],
+               stats.gshare[i].pstat.total, stats.gshare[i].pstat.mispred,
+               stats.gshare[i].pstat.total ? 100.0 * stats.gshare[i].pstat.mispred / stats.gshare[i].pstat.total : 0.0);
+      }
     }
     memory_delete(mem);
+    for (int i = 0; i < 4; i++) {
+      free(stats.bimodal[i].ctr);
+      free(stats.gshare[i].ctr);
+    }
+    symbols_delete(symbols);
   }
   else {
     terminate("Missing operands");
