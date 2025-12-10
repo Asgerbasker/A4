@@ -97,6 +97,8 @@ int main(int argc, char *argv[]) {
     if (argc == 3 && !strcmp(argv[2], "-d")) {
       // disassemble text segment to stdout
       disassemble_to_stdout(mem, &prog_info, symbols);
+      memory_delete(mem);
+      symbols_delete(symbols);      
       exit(0);
     }
     int start_addr = prog_info.start;
@@ -155,14 +157,14 @@ int main(int argc, char *argv[]) {
       }
     }
     memory_delete(mem);
+    symbols_delete(symbols);
     for (int i = 0; i < 4; i++) {
       free(stats.bimodal[i].ctr);
       free(stats.gshare[i].ctr);
     }
-    symbols_delete(symbols);
   }
   else {
-    terminate("Missing operands");
     memory_delete(mem);
+    terminate("Missing operands");
   }
 }

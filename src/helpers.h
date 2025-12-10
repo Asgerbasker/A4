@@ -21,6 +21,16 @@ static uint32_t get_rs2(uint32_t inst) {
     return inst >> 20 & 0x1F;
 }
 
+// Uses bitmask to return 3 bits from bits 12-14 of the instruction- the funct3
+static uint32_t get_funct3(uint32_t inst) {
+    return inst >> 12 & 0x7;
+}
+
+// Uses bitmask to return 7 bits from bits 25-31 of the instruction- the funct7
+static uint32_t get_funct7(uint32_t inst) {
+    return inst >> 25 & 0x7F;
+}
+
 // Get immediate (or offset)
 static int32_t get_imm(uint32_t inst) {
     int32_t imm = inst >> 20;             // imm[11:0] = inst[31:20]
@@ -59,23 +69,6 @@ static int32_t get_jump_imm(uint32_t inst) {
     imm |= ((inst >> 12) & 0xFF) << 12;   // imm[19:12] = inst[19:12]
     imm |= ((inst >> 31) & 0x1) << 20;    // imm[20] = inst[31]
     return (imm << 11) >> 11;             // sign-extend 21-bit immediate (imm[20] is the sign bit)
-}
-
-// Uses bitmask to return 3 bits from bits 12-14 - the funct3
-static uint32_t get_funct3(uint32_t inst) {
-    return inst >> 12 & 0x7;
-}
-
-// Uses bitmask to return 7 bits from bits 25-31 - the funct7
-static uint32_t get_funct7(uint32_t inst) {
-    return inst >> 25 & 0x7F;
-}
-
-// Write register, but ignore x0
-static inline void write_reg(uint32_t rd, int32_t value, int32_t registers[]) {
-    if (rd != 0 && rd < 32) {
-        registers[rd] = value;
-    }
 }
 
 // RV32M: helper functions for multiplication/division
@@ -129,6 +122,13 @@ static uint32_t rv32m_remu(uint32_t a, uint32_t b) {
         return a;
     }
     return a % b;
+}
+
+// Write register, but ignore x0
+static inline void write_reg(uint32_t rd, int32_t value, int32_t registers[]) {
+    if (rd != 0 && rd < 32) {
+        registers[rd] = value;
+    }
 }
 
 // Syscall: ecall with A7 (x17) as call-number

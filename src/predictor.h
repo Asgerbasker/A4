@@ -69,9 +69,13 @@ static void bimodal_update(struct Bimodal *bimodal, uint32_t pc, int actual_take
     }
     // opdate state
     if (actual_taken) {
-        if (state < 3) state++;
+        if (state < 3) { 
+            state++;
+        }
     } else {
-        if (state > 0) state--;
+        if (state > 0) {
+            state--;
+        }
     }
     bimodal->ctr[index] = state;
 }
@@ -104,9 +108,13 @@ static void gshare_update(struct GShare *gshare, uint32_t pc, int actual_taken) 
     }
     // opdater saturerende counter
     if (actual_taken) {
-        if (state < 3) state++;
+        if (state < 3) {
+            state++;
+        }
     } else {
-        if (state > 0) state--;
+        if (state > 0) {
+            state--;
+        }
     }
     gshare->ctr[index] = state;
 

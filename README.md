@@ -44,7 +44,7 @@ Victor Panduro Andersen - xkf701
 
     Example usage:
     ~~~bash
-    ./sim ../predictor-benchmark/erat.elf -l log
+    ./sim ../predictor-benchmarks/erat.elf -l log
 
 3. If you want to run the simulator with logging of the summary to an output file, run the command:
 
@@ -54,7 +54,7 @@ Victor Panduro Andersen - xkf701
 
     Example usage:
     ~~~bash
-    ./sim ../predictor-benchmark/erat.elf -s log
+    ./sim ../predictor-benchmarks/erat.elf -s log
 
 4. Without logging:
 
