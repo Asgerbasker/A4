@@ -3,7 +3,7 @@
 #include "helpers.h"
 
 Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct symbols* symbols) {
-    struct Stat stat = {0};
+    Stat stat = {0};
     const unsigned sizes[4] = {256, 1024, 4096, 16384};
 
     for (int i = 0; i < 4; i++) {
@@ -101,52 +101,50 @@ Stat simulate(struct memory *mem, int start_addr, FILE *log_file, struct symbols
             }
             /* Branches */
             case 0x63: {
-                int take_branch = 0;
                 switch (funct3) {
                     case 0x0: { // beq
-                        take_branch = (v_rs1 == v_rs2);
+                        branch_taken = (v_rs1 == v_rs2);
                         break;
                     }
                     case 0x1: { // bne
-                        take_branch = (v_rs1 != v_rs2);
+                        branch_taken = (v_rs1 != v_rs2);
                         break;
                     }
                     case 0x4: { // blt
-                        take_branch = (v_rs1 < v_rs2);
+                        branch_taken = (v_rs1 < v_rs2);
                         break;
                     }
                     case 0x5: { // bge
-                        take_branch = (v_rs1 >= v_rs2);
+                        branch_taken = (v_rs1 >= v_rs2);
                         break;
                     }
                     case 0x6: { // bltu
-                        take_branch = ((uint32_t)v_rs1 < (uint32_t)v_rs2);
+                        branch_taken = ((uint32_t)v_rs1 < (uint32_t)v_rs2);
                         break;
                     }
                     case 0x7: { // bgeu
-                        take_branch = ((uint32_t)v_rs1 >= (uint32_t)v_rs2);
+                        branch_taken = ((uint32_t)v_rs1 >= (uint32_t)v_rs2);
                         break;
                     }
                     default: {
                         break;
                     }
                 }
-                if (take_branch) {
+                if (branch_taken) {
                     next_pc = pc + bimm;
                     mark_target = 1;
                 }
                 // log info about jump
                 branch_logged = 1;
-                branch_taken = take_branch;
 
                 // update jump predictors
                 // NT + BTFNT
-                pred_nt(&stat.nt, take_branch);
-                pred_btfnt(&stat.btfnt, take_branch, bimm);
+                pred_nt(&stat.nt, branch_taken);
+                pred_btfnt(&stat.btfnt, branch_taken, bimm);
                 // Bimodal + gShare
                 for (int i = 0; i < 4; i++) {
-                    bimodal_update(&stat.bimodal[i], pc, take_branch);
-                    gshare_update(&stat.gshare[i], pc, take_branch);
+                    bimodal_update(&stat.bimodal[i], pc, branch_taken);
+                    gshare_update(&stat.gshare[i], pc, branch_taken);
                 }
                 break;
             }

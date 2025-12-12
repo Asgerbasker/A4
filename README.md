@@ -49,7 +49,7 @@ Victor Panduro Andersen - xkf701
 3. If you want to run the simulator with logging of the summary to an output file, run the command:
 
     ~~~bash
-    ./sim <path-to-.elf-file> -l <name-of-output-file>
+    ./sim <path-to-.elf-file> -s <name-of-output-file>
     ~~~
 
     Example usage:

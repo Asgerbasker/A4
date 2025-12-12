@@ -10,7 +10,7 @@
     10 => 00008 : 00000513  addi x10, x0, 0    R[10] <- 0
     11    0000c : 00000000  unknown (0x00000000)
 
-Simulated 11 instructions in 430 host ticks (0.025581 MIPS)
+Simulated 11 instructions in 63 host ticks (0.174603 MIPS)
 
 Branch prediction statistics:
   NT:    0 predictions, 0 mispredictions (0.00%)

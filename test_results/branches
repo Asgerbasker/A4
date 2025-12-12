@@ -13,9 +13,10 @@
     13    100b4 : 00528293  addi x5, x5, 5    R[ 5] <- f
     14    100b8 : 0012f463  bgeu x5, x1, 100c0    {T}
     15 => 100c0 : 00528293  addi x5, x5, 5    R[ 5] <- 14
-    16    100c4 : 00000000  unknown (0x00000000)
+    16    100c4 : 00300893  addi x17, x0, 3    R[17] <- 3
+    17    100c8 : 00000073  ecall
 
-Simulated 16 instructions in 376 host ticks (0.042553 MIPS)
+Simulated 17 instructions in 48 host ticks (0.354167 MIPS)
 
 Branch prediction statistics:
   NT:    6 predictions, 5 mispredictions (83.33%)
