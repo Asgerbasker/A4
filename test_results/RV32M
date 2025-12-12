@@ -1,0 +1,33 @@
+     1    10074 : 00100093  addi x1, x0, 1    R[ 1] <- 1
+     2    10078 : 00200113  addi x2, x0, 2    R[ 2] <- 2
+     3    1007c : 12c00193  addi x3, x0, 300    R[ 3] <- 12c
+     4    10080 : 19000213  addi x4, x0, 400    R[ 4] <- 190
+     5    10084 : 1f400293  addi x5, x0, 500    R[ 5] <- 1f4
+     6    10088 : 25800313  addi x6, x0, 600    R[ 6] <- 258
+     7    1008c : 00700393  addi x7, x0, 7    R[ 7] <- 7
+     8    10090 : 32000413  addi x8, x0, 800    R[ 8] <- 320
+     9    10094 : 38400493  addi x9, x0, 900    R[ 9] <- 384
+    10    10098 : 022080b3  mul x1, x1, x2    R[ 1] <- 2
+    11    1009c : 02419133  mulh x2, x3, x4    R[ 2] <- 0
+    12    100a0 : 029420b3  mulhsu x1, x8, x9    R[ 1] <- 0
+    13    100a4 : 0262b0b3  mulhu x1, x5, x6    R[ 1] <- 0
+    14    100a8 : 024240b3  div x1, x4, x4    R[ 1] <- 1
+    15    100ac : 024250b3  divu x1, x4, x4    R[ 1] <- 1
+    16    100b0 : 027360b3  rem x1, x6, x7    R[ 1] <- 5
+    17    100b4 : 027370b3  remu x1, x6, x7    R[ 1] <- 5
+    18    100b8 : 00300893  addi x17, x0, 3    R[17] <- 3
+    19    100bc : 00000073  ecall
+
+Simulated 19 instructions in 46 host ticks (0.413043 MIPS)
+
+Branch prediction statistics:
+  NT:    0 predictions, 0 mispredictions (0.00%)
+  BTFNT: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal   256: 0 predictions, 0 mispredictions (0.00%)
+  gShare    256: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  1024: 0 predictions, 0 mispredictions (0.00%)
+  gShare   1024: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  4096: 0 predictions, 0 mispredictions (0.00%)
+  gShare   4096: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal 16384: 0 predictions, 0 mispredictions (0.00%)
+  gShare  16384: 0 predictions, 0 mispredictions (0.00%)
