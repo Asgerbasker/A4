@@ -1,0 +1,38 @@
+     1    10074 : 00000093  addi x1, x0, 0    R[ 1] <- 0
+     2    10078 : 00000113  addi x2, x0, 0    R[ 2] <- 0
+     3    1007c : 00000193  addi x3, x0, 0    R[ 3] <- 0
+     4    10080 : 00000213  addi x4, x0, 0    R[ 4] <- 0
+     5    10084 : 00000293  addi x5, x0, 0    R[ 5] <- 0
+     6    10088 : 00000313  addi x6, x0, 0    R[ 6] <- 0
+     7    1008c : 00000393  addi x7, x0, 0    R[ 7] <- 0
+     8    10090 : 00000413  addi x8, x0, 0    R[ 8] <- 0
+     9    10094 : 00000493  addi x9, x0, 0    R[ 9] <- 0
+    10    10098 : 00500093  addi x1, x0, 5    R[ 1] <- 5
+    11    1009c : 00700113  addi x2, x0, 7    R[ 2] <- 7
+    12    100a0 : 401101b3  sub x3, x2, x1    R[ 3] <- 2
+    13    100a4 : 00100213  addi x4, x0, 1    R[ 4] <- 1
+    14    100a8 : 004191b3  sll x3, x3, x4    R[ 3] <- 4
+    15    100ac : 0020a2b3  slt x5, x1, x2    R[ 5] <- 1
+    16    100b0 : 0020b333  sltu x6, x1, x2    R[ 6] <- 1
+    17    100b4 : 0020c3b3  xor x7, x1, x2    R[ 7] <- 2
+    18    100b8 : 06400413  addi x8, x0, 100    R[ 8] <- 64
+    19    100bc : 00100093  addi x1, x0, 1    R[ 1] <- 1
+    20    100c0 : 001450b3  srl x1, x8, x1    R[ 1] <- 32
+    21    100c4 : 40145133  sra x2, x8, x1    R[ 2] <- 0
+    22    100c8 : 001161b3  or x3, x2, x1    R[ 3] <- 32
+    23    100cc : 00117233  and x4, x2, x1    R[ 4] <- 0
+    24    100d0 : 00000000  unknown (0x00000000)
+
+Simulated 24 instructions in 290 host ticks (0.082759 MIPS)
+
+Branch prediction statistics:
+  NT:    0 predictions, 0 mispredictions (0.00%)
+  BTFNT: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal   256: 0 predictions, 0 mispredictions (0.00%)
+  gShare    256: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  1024: 0 predictions, 0 mispredictions (0.00%)
+  gShare   1024: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  4096: 0 predictions, 0 mispredictions (0.00%)
+  gShare   4096: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal 16384: 0 predictions, 0 mispredictions (0.00%)
+  gShare  16384: 0 predictions, 0 mispredictions (0.00%)

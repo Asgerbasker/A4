@@ -1,0 +1,25 @@
+     1    10074 : 00000093  addi x1, x0, 0    R[ 1] <- 0
+     2    10078 : 00800113  addi x2, x0, 8    R[ 2] <- 8
+     3    1007c : 00000193  addi x3, x0, 0    R[ 3] <- 0
+     4    10080 : 00c0026f  jal x4, 1008c    R[ 4] <- 10084
+     5 => 1008c : 00a18193  addi x3, x3, 10    R[ 3] <- a
+     6    10090 : 06400293  addi x5, x0, 100    R[ 5] <- 64
+     7    10094 : 51300193  addi x3, x0, 1299    R[ 3] <- 513
+     8    10098 : 00312023  sw x3, 0(x2)    M[00000008] <- 00000513
+     9    1009c : 00010067  jalr x0, 0(x2)
+    10 => 00008 : 00000513  addi x10, x0, 0    R[10] <- 0
+    11    0000c : 00000000  unknown (0x00000000)
+
+Simulated 11 instructions in 430 host ticks (0.025581 MIPS)
+
+Branch prediction statistics:
+  NT:    0 predictions, 0 mispredictions (0.00%)
+  BTFNT: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal   256: 0 predictions, 0 mispredictions (0.00%)
+  gShare    256: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  1024: 0 predictions, 0 mispredictions (0.00%)
+  gShare   1024: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal  4096: 0 predictions, 0 mispredictions (0.00%)
+  gShare   4096: 0 predictions, 0 mispredictions (0.00%)
+  Bimodal 16384: 0 predictions, 0 mispredictions (0.00%)
+  gShare  16384: 0 predictions, 0 mispredictions (0.00%)

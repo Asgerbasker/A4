@@ -1,0 +1,30 @@
+     1    10074 : 00000093  addi x1, x0, 0    R[ 1] <- 0
+     2    10078 : 00000113  addi x2, x0, 0    R[ 2] <- 0
+     3    1007c : 00000193  addi x3, x0, 0    R[ 3] <- 0
+     4    10080 : 00000213  addi x4, x0, 0    R[ 4] <- 0
+     5    10084 : 00000293  addi x5, x0, 0    R[ 5] <- 0
+     6    10088 : 00128463  beq x5, x1, 10090    {T}
+     7 => 10090 : 00a00293  addi x5, x0, 10    R[ 5] <- a
+     8    10094 : 00129463  bne x5, x1, 1009c    {T}
+     9 => 1009c : 00500093  addi x1, x0, 5    R[ 1] <- 5
+    10    100a0 : 0050c463  blt x1, x5, 100a8    {T}
+    11 => 100a8 : 0012d463  bge x5, x1, 100b0    {T}
+    12 => 100b0 : 0012e463  bltu x5, x1, 100b8    {F}
+    13    100b4 : 00528293  addi x5, x5, 5    R[ 5] <- f
+    14    100b8 : 0012f463  bgeu x5, x1, 100c0    {T}
+    15 => 100c0 : 00528293  addi x5, x5, 5    R[ 5] <- 14
+    16    100c4 : 00000000  unknown (0x00000000)
+
+Simulated 16 instructions in 376 host ticks (0.042553 MIPS)
+
+Branch prediction statistics:
+  NT:    6 predictions, 5 mispredictions (83.33%)
+  BTFNT: 6 predictions, 5 mispredictions (83.33%)
+  Bimodal   256: 6 predictions, 1 mispredictions (16.67%)
+  gShare    256: 6 predictions, 1 mispredictions (16.67%)
+  Bimodal  1024: 6 predictions, 1 mispredictions (16.67%)
+  gShare   1024: 6 predictions, 1 mispredictions (16.67%)
+  Bimodal  4096: 6 predictions, 1 mispredictions (16.67%)
+  gShare   4096: 6 predictions, 1 mispredictions (16.67%)
+  Bimodal 16384: 6 predictions, 1 mispredictions (16.67%)
+  gShare  16384: 6 predictions, 1 mispredictions (16.67%)
